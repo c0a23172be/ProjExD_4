@@ -242,6 +242,25 @@ class Score:
         screen.blit(self.image, self.rect)
 
 
+class Gravity(pg.sprite.Sprite):
+    """
+    画面全体を覆う重力場を発生させる
+    """
+    def __init__(self, life:int):
+        super().__init__()
+        self.image = pg.Surface((WIDTH, HEIGHT))
+        pg.draw.rect(self.image, (0, 0, 0), (0, 0, WIDTH, HEIGHT))
+        self.image.set_alpha(128)  #透明度
+        self.rect = self.image.get_rect()
+        self.life = life
+
+    def update(self, screen: pg.Surface):
+        self.life -= 1
+        screen.blit(self.image, self.rect)
+        if self.life < 0:  # lifeが0未満になったらkill
+            self.kill()
+
+
 def main():
     pg.display.set_caption("真！こうかとん無双")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -253,6 +272,7 @@ def main():
     beams = pg.sprite.Group()
     exps = pg.sprite.Group()
     emys = pg.sprite.Group()
+    gravitys = pg.sprite.Group()
 
     tmr = 0
     clock = pg.time.Clock()
@@ -288,6 +308,26 @@ def main():
             pg.display.update()
             time.sleep(2)
             return
+        
+        if event.type == pg.KEYDOWN and event.key == pg.K_RETURN and score.value >= 200:  # リターンキー押下かつスコアが200より大
+            gravity = Gravity(400)
+            gravitys.add(gravity)
+            score.value -= 200  # 消費スコア
+
+        if gravitys:  # 重力場が発生していたら
+                gravitys.update(screen)
+
+                for bomb in pg.sprite.groupcollide(bombs, gravitys, True, False).keys():
+                    exps.add(Explosion(bomb, 50))
+                    bombs.remove(bomb)
+
+                for emy in pg.sprite.groupcollide(emys, gravitys, True, False).keys():
+                    exps.add(Explosion(emy, 50))
+                    emys.remove(emy)
+
+
+                    
+            
 
         bird.update(key_lst, screen)
         beams.update()
