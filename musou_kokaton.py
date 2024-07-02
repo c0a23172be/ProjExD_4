@@ -95,8 +95,9 @@ class Bird(pg.sprite.Sprite):
             if key_lst[k]:
                 sum_mv[0] += mv[0]
                 sum_mv[1] += mv[1]
-            if key_lst[pg.K_LSHIFT]:
-                self.speed = 20
+                if key_lst[pg.K_LSHIFT]:
+                    self.speed = 20
+
         self.rect.move_ip(self.speed*sum_mv[0], self.speed*sum_mv[1])
         if check_bound(self.rect) != (True, True):
             self.rect.move_ip(-self.speed*sum_mv[0], -self.speed*sum_mv[1])
@@ -109,6 +110,7 @@ class Bird(pg.sprite.Sprite):
             self.hyper_life -= 1
             if self.hyper_life < 0:
                 self.state = "normal"
+        self.speed = 10
 
 
 class Bomb(pg.sprite.Sprite):
@@ -372,7 +374,7 @@ def main():
             exps.add(Explosion(bomb, 50))  # 爆発エフェクト
             score.value += 1  # 1点アップ
             
-        if len(pg.sprite.spritecollide(bird, bombs, True)) != 0:
+        if len(pg.sprite.spritecollide(bird, bombs, False)) != 0:
             if bird.state == "hyper":  # 無敵状態なら
                 score.value += 1
             else:  # ノーマルなら
